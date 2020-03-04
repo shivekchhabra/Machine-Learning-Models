@@ -1,28 +1,36 @@
+import pandas as pd
+import numpy as np
+import warnings
 from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score, f1_score, confusion_matrix, average_precision_score
+from sklearn.metrics import accuracy_score, f1_score, confusion_matrix, average_precision_score, \
+    r2_score, mean_squared_error
 from sklearn.naive_bayes import GaussianNB
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.naive_bayes import BernoulliNB
-from sklearn.linear_model import SGDClassifier, PassiveAggressiveClassifier, RidgeClassifier
-from sklearn.neural_network import MLPClassifier
-from sklearn.ensemble import AdaBoostClassifier, BaggingClassifier
+from sklearn.linear_model import SGDClassifier, PassiveAggressiveClassifier, RidgeClassifier, \
+    LinearRegression, RANSACRegressor, ARDRegression, HuberRegressor, LogisticRegression, \
+    LogisticRegressionCV, SGDRegressor, TheilSenRegressor, PassiveAggressiveRegressor
+from sklearn.neural_network import MLPClassifier, MLPRegressor
+from sklearn.ensemble import AdaBoostClassifier, BaggingClassifier, RandomForestClassifier, \
+    RandomForestRegressor, AdaBoostRegressor, BaggingRegressor
 from sklearn import svm
-from xgboost import XGBClassifier
+from xgboost import XGBClassifier, XGBRegressor
 from sklearn.discriminant_analysis import QuadraticDiscriminantAnalysis, LinearDiscriminantAnalysis
-from sklearn.tree import DecisionTreeClassifier, ExtraTreeClassifier
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.linear_model import LogisticRegression
-from lightgbm import LGBMClassifier
-import pandas as pd
-import numpy as np
+from sklearn.tree import DecisionTreeClassifier, ExtraTreeClassifier, DecisionTreeRegressor, \
+    ExtraTreeRegressor
+from sklearn.neighbors import KNeighborsClassifier, KNeighborsRegressor
+from lightgbm import LGBMClassifier, LGBMRegressor
+
+warnings.filterwarnings("ignore", category=FutureWarning)
+
+np.random.seed(3)
 
 
 # Overview
 # This code contains different classification models
 
-class AllModels:
+class ClassificationModels:
     def __init__(self, data, label):
         self.data = data
         self.label = label
@@ -297,9 +305,149 @@ class AllModels:
         print('confusion matrix: \n', conf)
 
 
-# if __name__ == '__main__':
-#
-#
-#     obj = AllModels(data_main, labels)
-#     obj.xg()
-#     obj.dec_tree()
+class RegressionModels:
+    def __init__(self, data, label):
+        self.data = data
+        self.label = label
+
+    def preprocessing(self):
+        x = self.data
+        y = self.label
+        x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.25, random_state=0,
+                                                            shuffle=True)
+        y_train = np.array(y_train)
+        y_test = np.array(y_test)
+        return x_train, x_test, y_train, y_test
+
+    def printing(self, y_test, y_pred, name):
+        mape = mean_squared_error(y_test, y_pred)
+        rmse = np.sqrt(mean_squared_error(y_test, y_pred))
+        print('{} RMSE- {}'.format(name, round(rmse, 4)))
+        print('{} MAPE- {}%'.format(name, round(mape, 4)))
+        r2 = r2_score(y_test, y_pred)
+        print('{} R2 Score- {}'.format(name, round(r2, 4)))
+
+    # Adaboost
+    def adaboost_regressor(self):
+        x_train, x_test, y_train, y_test = self.preprocessing()
+        model = AdaBoostRegressor()
+        y_pred = model.fit(x_train, y_train).predict(x_test)
+        self.printing(y_test, y_pred, 'Adaboost')
+
+    # Linear
+    def linear_regressor(self):
+        x_train, x_test, y_train, y_test = self.preprocessing()
+        model = LinearRegression()
+        y_pred = model.fit(x_train, y_train).predict(x_test)
+        self.printing(y_test, y_pred, 'Linear Regression')
+
+    # Stochastic
+    def sgd_regressor(self):
+        x_train, x_test, y_train, y_test = self.preprocessing()
+        model = SGDRegressor()
+        y_pred = model.fit(x_train, y_train).predict(x_test)
+        self.printing(y_test, y_pred, 'Stochastic Gradient Descent')
+
+    # Decision Tree
+    def dec_tree_regressor(self):
+        x_train, x_test, y_train, y_test = self.preprocessing()
+        model = DecisionTreeRegressor()
+        y_pred = model.fit(x_train, y_train).predict(x_test)
+        self.printing(y_test, y_pred, 'Decision Tree')
+
+    # Random Forest
+    def random_forest_regressor(self):
+        x_train, x_test, y_train, y_test = self.preprocessing()
+        model = RandomForestRegressor()
+        y_pred = model.fit(x_train, y_train).predict(x_test)
+        self.printing(y_test, y_pred, 'Random Forest')
+
+    # RANSAC
+    def ransac_regressor(self):
+        x_train, x_test, y_train, y_test = self.preprocessing()
+        model = RANSACRegressor()
+        y_pred = model.fit(x_train, y_train).predict(x_test)
+        self.printing(y_test, y_pred, 'RANSAC')
+
+    # ARD
+    def ard_regressor(self):
+        x_train, x_test, y_train, y_test = self.preprocessing()
+        model = ARDRegression()
+        y_pred = model.fit(x_train, y_train).predict(x_test)
+        self.printing(y_test, y_pred, 'ARD')
+
+    # Huber
+    def huber_regressor(self):
+        x_train, x_test, y_train, y_test = self.preprocessing()
+        model = HuberRegressor()
+        y_pred = model.fit(x_train, y_train).predict(x_test)
+        self.printing(y_test, y_pred, 'Huber')
+
+    # Theilsen
+    def theilsen_regressor(self):
+        x_train, x_test, y_train, y_test = self.preprocessing()
+        model = TheilSenRegressor()
+        y_pred = model.fit(x_train, y_train).predict(x_test)
+        self.printing(y_test, y_pred, 'Theilsen')
+
+    # Passive Aggressive
+    def passive_aggressive_regressor(self):
+        x_train, x_test, y_train, y_test = self.preprocessing()
+        model = PassiveAggressiveRegressor()
+        y_pred = model.fit(x_train, y_train).predict(x_test)
+        self.printing(y_test, y_pred, 'Passive Aggressive')
+
+    # MLP
+    def mlp_regressor(self):
+        x_train, x_test, y_train, y_test = self.preprocessing()
+        model = MLPRegressor()
+        y_pred = model.fit(x_train, y_train).predict(x_test)
+        self.printing(y_test, y_pred, 'Multi Layer Perceptron')
+
+    # Bagging
+    def bagging_regressor(self):
+        x_train, x_test, y_train, y_test = self.preprocessing()
+        model = BaggingRegressor()
+        y_pred = model.fit(x_train, y_train).predict(x_test)
+        self.printing(y_test, y_pred, 'Bagging')
+
+    # XG Boost
+    def xgb_regressor(self):
+        x_train, x_test, y_train, y_test = self.preprocessing()
+        model = XGBRegressor()
+        y_pred = model.fit(x_train, y_train).predict(x_test)
+        self.printing(y_test, y_pred, 'XG Boost')
+
+    # Light GBM
+    def lgb_regressor(self):
+        x_train, x_test, y_train, y_test = self.preprocessing()
+        model = LGBMRegressor()
+        y_pred = model.fit(x_train, y_train).predict(x_test)
+        self.printing(y_test, y_pred, 'Light GBM')
+
+    # KNN
+    def knn_regressor(self):
+        x_train, x_test, y_train, y_test = self.preprocessing()
+        model = KNeighborsRegressor()
+        y_pred = model.fit(x_train, y_train).predict(x_test)
+        self.printing(y_test, y_pred, 'KNN')
+
+    # Extra Tree
+    def extra_tree_regressor(self):
+        x_train, x_test, y_train, y_test = self.preprocessing()
+        model = ExtraTreeRegressor()
+        y_pred = model.fit(x_train, y_train).predict(x_test)
+        self.printing(y_test, y_pred, 'Extra Tree')
+
+
+if __name__ == '__main__':
+    # from sklearn import datasets
+    #
+    # bh = datasets.load_boston()
+    # data = bh.data
+    # labels = bh.target
+    # obj = RegressionModels(data, labels)
+    # obj.xgb_regressor()
+    # obj.lgb_regressor()
+    # obj.knn_regressor()
+    # obj.extra_tree_regressor()
