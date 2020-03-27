@@ -28,7 +28,7 @@ np.random.seed(3)
 
 
 # Overview
-# This code contains different classification models
+# This code contains different classification adn regression models
 
 class ClassificationModels:
     def __init__(self, data, label):
